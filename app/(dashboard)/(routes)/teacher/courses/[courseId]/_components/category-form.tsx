@@ -28,25 +28,28 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
+import { Combobox } from "@/components/ui/combobox";
 
 const formSchema = z.object({
-  description: z.string().min(1, {
+  categoryId: z.string().min(1, {
     message: "Description is required",
   }),
 });
 
 type TFormSchema = z.infer<typeof formSchema>;
 
-interface DescriptionFormProps {
+interface CategoryFormProps {
   initialData: Course;
 
   courseId: string;
+  options: { label: string; value: string }[];
 }
 
-export function DescriptionForm({
+export function CategoryForm({
   initialData,
   courseId,
-}: DescriptionFormProps) {
+  options,
+}: CategoryFormProps) {
   const [isEditing, setIsEditing] = React.useState(false);
 
   const router = useRouter();
@@ -58,7 +61,7 @@ export function DescriptionForm({
   const form = useForm<TFormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      description: initialData?.description || "",
+      categoryId: initialData?.categoryId || "",
     },
   });
 
@@ -68,7 +71,7 @@ export function DescriptionForm({
     try {
       await axios.patch(`/api/courses/${courseId}`, values);
 
-      toast.success("Successfully updated title");
+      toast.success("Successfully updated course category");
       toggleEdit();
       router.refresh();
     } catch (error) {
@@ -76,17 +79,21 @@ export function DescriptionForm({
     }
   }
 
+  const selectedOption = options.find(
+    (option) => option.value === initialData.categoryId
+  );
+
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Course description
+        Course category
         <Button variant={"ghost"} onClick={toggleEdit}>
           {isEditing ? (
             <>Cancel</>
           ) : (
             <>
               <PencilIcon className="h-4 w-4 mr-2" />
-              Edit description
+              Edit category
             </>
           )}
         </Button>
@@ -95,10 +102,10 @@ export function DescriptionForm({
         <p
           className={cn(
             "text-sm mt-2",
-            !initialData.description && "text-slate-500 italic"
+            !initialData.categoryId && "text-slate-500 italic"
           )}
         >
-          {initialData.description || "No description"}
+          {selectedOption?.label || "No category"}
         </p>
       )}
       {isEditing && (
@@ -109,15 +116,11 @@ export function DescriptionForm({
           >
             <FormField
               control={form.control}
-              name="description"
+              name="categoryId"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea
-                      disabled={isSubmitting}
-                      placeholder="e.g. 'This course is about...'"
-                      {...field}
-                    />
+                    <Combobox options={...options} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
