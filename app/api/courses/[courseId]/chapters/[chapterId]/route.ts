@@ -166,5 +166,3 @@ export async function PATCH(
     return new NextResponse("Internale error", { status: 500 });
   }
 }
-
-// TODO: Create route for publishing the chapter

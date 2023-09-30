@@ -29,6 +29,30 @@ export function ChapterActions({
 
   const router = useRouter();
 
+  async function handleClick() {
+    try {
+      setIsLoading(true);
+
+      if (isPublished) {
+        await axios.patch(
+          `/api/courses/${courseId}/chapters/${chapterId}/unpublish`
+        );
+        toast.success("Chapter unpublished");
+        router.refresh();
+      } else {
+        await axios.patch(
+          `/api/courses/${courseId}/chapters/${chapterId}/publish`
+        );
+        toast.success("Chapter published");
+        router.refresh();
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   async function onDelete() {
     try {
       setIsLoading(true);
@@ -50,7 +74,7 @@ export function ChapterActions({
   return (
     <div className="flex items-center gap-x-2">
       <Button
-        onClick={() => {}}
+        onClick={handleClick}
         disabled={disabled || isLoading}
         variant={"outline"}
         size={"sm"}
