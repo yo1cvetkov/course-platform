@@ -2,6 +2,8 @@
 
 import * as React from "react";
 
+import axios from "axios";
+
 import { useRouter } from "next/navigation";
 
 import { Trash } from "lucide-react";
@@ -10,7 +12,8 @@ import toast from "react-hot-toast";
 
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
+
+import { useConfettiStore } from "@/hooks/use-confetti-store";
 
 interface ActionsProps {
   disabled: boolean;
@@ -23,6 +26,8 @@ export function Actions({ disabled, courseId, isPublished }: ActionsProps) {
 
   const router = useRouter();
 
+  const confetti = useConfettiStore();
+
   async function handleClick() {
     try {
       setIsLoading(true);
@@ -34,6 +39,7 @@ export function Actions({ disabled, courseId, isPublished }: ActionsProps) {
       } else {
         await axios.patch(`/api/courses/${courseId}/publish`);
         toast.success("Course published");
+        confetti.onOpen();
         router.refresh();
       }
     } catch {
