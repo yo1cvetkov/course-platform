@@ -37,6 +37,36 @@ export function VideoPlayer({
 }: VideoPlayerProps) {
   const [isReady, setIsReady] = React.useState(false);
 
+  const router = useRouter();
+
+  const confetti = useConfettiStore();
+
+  async function handleEnd() {
+    try {
+      if (completeOnEnd) {
+        await axios.put(
+          `/api/courses/${courseId}/chapters/${chapterId}/progress`,
+          {
+            isCompleted: true,
+          }
+        );
+      }
+
+      if (!nextChapterId) {
+        confetti.onOpen();
+      }
+
+      toast.success("Progress updated");
+      router.refresh();
+
+      if (nextChapterId) {
+        router.push(`/courses/${courseId}/chapters/${nextChapterId}`);
+      }
+    } catch {
+      toast.error("Something went wrong");
+    }
+  }
+
   return (
     <div className="relative aspect-video">
       {!isReady && !isLocked && (
@@ -55,8 +85,7 @@ export function VideoPlayer({
           title={title}
           className={cn(!isReady && "hidden")}
           onCanPlay={() => setIsReady(true)}
-          onEnded={() => {}}
-          autoPlay
+          onEnded={handleEnd}
           playbackId={playbackId}
         />
       )}
